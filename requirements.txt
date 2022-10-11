@@ -1,0 +1,5 @@
+snscrape
+transformers
+re
+numpy
+pandas
