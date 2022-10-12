@@ -3,3 +3,6 @@ transformers
 re
 numpy
 pandas
+mtranslate
+datetime
+timeit

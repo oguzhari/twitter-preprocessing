@@ -3,6 +3,9 @@ import snscrape.modules.twitter as sntwitter
 import re
 import numpy as np
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
+from mtranslate import translate
+from timeit import default_timer as timer
+from datetime import timedelta
 
 
 def get_tweets(query, limit=1000000000):
@@ -169,3 +172,52 @@ def sentiment(series, model_name="savasy/bert-base-turkish-sentiment-cased"):
         if i % 100 == 0 and i != 0:
             print(f"Sentiment analysis of {i} tweets is done")
     return pd.DataFrame({'label': label, 'score': score})
+
+
+def translator(series, target_language="en", from_language="auto", secure_translations=False, secure_frequency=1000):
+    """
+    Tasks
+    -----
+        Translate given series to target language. The process is too slow due to the API limit.
+        if you want to secure your translations, you can use secure_translations=True. It will save the translations
+        in every secure_frequency. Due to the API limit, it is recommended to use secure_translations=True.
+        if API give you an error and secure_transltions=False you will lose all the translations.
+        Enable secure_translations may slow down the process.
+    Parameters
+    ----------
+    series: pandas.Series
+        The series to be translated.
+    target_language: str (default="en")
+        The target language to be translated.
+    from_language: str (default="auto")
+        The language of the given series. If "auto", the language will be detected automatically.
+    secure_translations: bool (default=False)
+        If True, the translation will be done in batches.
+    secure_frequency: int (default=1000)
+        The frequency of the batches.
+    Returns
+    -------
+    series: pandas.Series
+        The translated series.
+    """
+    secure_list, translate_list = [], []
+    start = timer()
+    print("Translation started, It's too slow due to API limit.")
+    print("100 tweets nearly takes 40 seconds")
+    print("You will see the progress in the console soon.")
+    for i, k in enumerate(series):
+        try:
+            translate_list.append(translate(k, target_language, from_language))
+            if secure_translations:
+                if i % secure_frequency == 0 and i != 0:
+                    print(f"{i} tweets are translated and secured")
+                    secure_list = translate_list.copy()
+                elif i % 100 == 0 and i != 0:
+                    print(f"{i} tweets are translated and {timedelta(seconds=(timer() - start))} time elapsed")
+            elif i % 100 == 0 and i != 0:
+                print(f"{i} tweets are translated and {timedelta(seconds=(timer() - start))} time elapsed")
+        except Exception as e:
+            print(e)
+            return secure_list
+    print(f"Translation is done in {timedelta(seconds=(timer() - start))}")
+    return translate_list
