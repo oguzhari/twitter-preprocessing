@@ -30,10 +30,3 @@ tweets[['label', 'score']] = sentiment(tweets['content'])
 
 tweets['translated'] = translator(tweets['content'], 'en', secure_translations=True)
 
-# Hashtag, User Names/Mentions, Links, Numbers, İkiden küçük metinleri sileceğiz, Stop Words, Küçük harf
-# Noktalama İşaretleri, çok az ifade edilen kelimelerin silinmesi.
-
-# Bir kelime veriyoruz,
-# Bin tane tweet alıyoruz. (55 Sütun + 2 Duygu Skoru)
-# Bir dosyaya yazıyoruz, bütün ön işleme adımları yapılıyor.
-# En az iki duygulu BERT
