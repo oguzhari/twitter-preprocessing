@@ -13,6 +13,7 @@ def get_tweets(query, limit=1000000000):
     Tasks
     -----
         Gets tweets from Twitter.
+
     Parameters
     ----------
     query: str
@@ -181,8 +182,9 @@ def translator(series, target_language="en", from_language="auto", secure_transl
         Translate given series to target language. The process is too slow due to the API limit.
         if you want to secure your translations, you can use secure_translations=True. It will save the translations
         in every secure_frequency. Due to the API limit, it is recommended to use secure_translations=True.
-        if API give you an error and secure_transltions=False you will lose all the translations.
+        if API give you an error and secure_translations=False you will lose all the translations.
         Enable secure_translations may slow down the process.
+
     Parameters
     ----------
     series: pandas.Series
@@ -195,6 +197,7 @@ def translator(series, target_language="en", from_language="auto", secure_transl
         If True, the translation will be done in batches.
     secure_frequency: int (default=1000)
         The frequency of the batches.
+
     Returns
     -------
     series: pandas.Series
