@@ -8,7 +8,7 @@ from timeit import default_timer as timer
 from datetime import timedelta
 
 
-def get_tweets(query, limit=1000000000):
+def get_tweets(query, limit=1_000_000_000, csv_only=False):
     """
     Tasks
     -----
@@ -20,7 +20,8 @@ def get_tweets(query, limit=1000000000):
         The query to be searched on Twitter.
     limit: int (default=1000000000)
         The limit of tweets to be searched.
-
+    csv_only: bool
+        If true, instead returning a dataframe, save the output as a CSV file.
     Returns
     -------
     dataframe: pandas.DataFrame
@@ -60,9 +61,12 @@ def get_tweets(query, limit=1000000000):
                                               'user_protected', 'user_raw_description', 'user_statuses_count',
                                               'user_url', 'user_username', 'user_verified'])
 
-    print(f"Dataframe have {dataframe.shape[0]} tweets")
-
-    return dataframe
+    if csv_only:
+        dataframe.to_csv('tweets.csv', encoding='utf-8-sig', index=False)
+        print("Downloaded tweets saved as CSV.")
+    else:
+        print(f"Dataframe have {dataframe.shape[0]} tweets")
+        return dataframe
 
 
 def preprocessing(series, remove_hashtag=False, remove_mentions=False, remove_links=False, remove_numbers=False,
@@ -205,9 +209,10 @@ def translator(series, target_language="en", from_language="auto", secure_transl
     """
     secure_list, translate_list = [], []
     start = timer()
+    error = False
     print("Translation started, It's too slow due to API limit.")
     print("100 tweets nearly takes 40 seconds")
-    print("You will see the progress in the console soon.")
+    print("You will see progress in the console soon.")
     for i, k in enumerate(series):
         try:
             translate_list.append(translate(k, target_language, from_language))
@@ -221,6 +226,7 @@ def translator(series, target_language="en", from_language="auto", secure_transl
                 print(f"{i} tweets are translated and {timedelta(seconds=(timer() - start))} time elapsed")
         except Exception as e:
             print(e)
-            return secure_list
+            error = False
+            return secure_list, error
     print(f"Translation is done in {timedelta(seconds=(timer() - start))}")
-    return translate_list
+    return translate_list, error

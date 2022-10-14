@@ -5,7 +5,7 @@ tweets_list = []
 query = "(zelenski OR zelensky OR zelenskiy) lang:tr until:2022-02-12 since:2022-01-12"
 # You can get that query from the website: https://twitter.com/search-advanced
 
-tweets = get_tweets(query, 1000)
+tweets = get_tweets(query, 100)
 
 # For remove mentions from tweets
 tweets['test_content'] = preprocessing(tweets['content'], remove_mentions=True)
@@ -28,5 +28,8 @@ tweets['test_content6'] = preprocessing(tweets['content'], remove_stopwords=True
 # For extract sentiment labels and scores from tweets
 tweets[['label', 'score']] = sentiment(tweets['content'])
 
-tweets['translated'] = translator(tweets['content'], 'en', secure_translations=True)
+translates, error = translator(tweets['content'], 'en', secure_translations=True)
+
+if not error:
+    tweets['translated'] = translates
 
