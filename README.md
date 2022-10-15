@@ -30,5 +30,7 @@ Direkt olarak üstünde çalışmak için.
 tweets = get_tweets(query, 100)
 ```
 
+Özellikle `transformers` kütüphanesi `CUDA` ve `PyTorch` gerektirdiğinden ilk çalıştırma için sorun oluşturabilir. Bu sebepten ötürü direkt olarak çalışmaya ait **[Google Colab Versiyonu]** kullanabilirsiniz.
 
 [Twitter Advanced Search]: https://twitter.com/search-advanced
+[Google Colab Versiyonu]: https://colab.research.google.com/drive/17BZVWFrTTd1_UC42Q9Iigg1e5K3ieyWS?usp=sharing
