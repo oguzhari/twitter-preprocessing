@@ -6,3 +6,4 @@ pandas
 mtranslate
 datetime
 timeit
+langdetect

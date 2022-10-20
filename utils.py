@@ -6,9 +6,10 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipe
 from mtranslate import translate
 from timeit import default_timer as timer
 from datetime import timedelta
+from langdetect import detect
 
 
-def get_tweets(query, limit=1_000_000_000, csv_only=False):
+def get_tweets(query, limit=1000000000):
     """
     Tasks
     -----
@@ -20,8 +21,7 @@ def get_tweets(query, limit=1_000_000_000, csv_only=False):
         The query to be searched on Twitter.
     limit: int (default=1000000000)
         The limit of tweets to be searched.
-    csv_only: bool
-        If true, instead returning a dataframe, save the output as a CSV file.
+
     Returns
     -------
     dataframe: pandas.DataFrame
@@ -35,9 +35,9 @@ def get_tweets(query, limit=1_000_000_000, csv_only=False):
             tweets.append(
                 [t.id, t.url, t.media, t.date.strftime("%d/%m/%Y, %H:%M:%S"), t.retweetCount, t.likeCount, t.quoteCount,
                  t.hashtags, t.content, t.lang, t.user.location, t.cashtags, t.conversationId, t.coordinates,
-                 t.inReplyToTweetId, t.inReplyToUser, t.mentionedUsers, t.outlinks, t.outlinksss, t.place,
+                 t.inReplyToTweetId, t.inReplyToUser, t.mentionedUsers, t.outlinks, t.place,
                  t.quotedTweet, t.renderedContent, t.replyCount, t.retweetCount, t.retweetedTweet, t.source,
-                 t.sourceLabel, t.sourceUrl, t.tcooutlinks, t.tcooutlinksss, t.user, t.user.username,
+                 t.sourceLabel, t.sourceUrl, t.tcooutlinks, t.user, t.user.username,
                  t.user.created.strftime("%d-%m-%Y %H:%M:%S"), t.user.description, t.user.descriptionUrls,
                  t.user.displayname, t.user.favouritesCount, t.user.followersCount, t.user.friendsCount, t.user.id,
                  t.user.label, t.user.linkTcourl, t.user.linkUrl, t.user.listedCount, t.user.location,
@@ -50,10 +50,10 @@ def get_tweets(query, limit=1_000_000_000, csv_only=False):
     dataframe = pd.DataFrame(tweets, columns=['id', 'url', 'media', 'date', 'retweet_count', 'like_count', 'quoteCount',
                                               'hashtags', 'content', 'lang', 'user_location',
                                               'cashtags', 'conversation_id', 'coordinates', 'inReplyToTweetId',
-                                              'inReplyToUser', 'mentionedUsers', 'out_links', 'out_linksss', 'place',
+                                              'inReplyToUser', 'mentionedUsers', 'out_links', 'place',
                                               'quotedTweet', 'renderedContent', 'replyCount', 'retweetCount',
                                               'retweetedTweet', 'source', 'sourceLabel', 'sourceUrl', 'tco_out_links',
-                                              'tco_out_linksss', 'user', 'user_name', 'user_created', 'user_description',
+                                              'user', 'user_name', 'user_created', 'user_description',
                                               'user_descriptionUrls', 'user_display_name', 'user_favouritesCount',
                                               'user_followersCount', 'user_friendsCount', 'user_id', 'user_label',
                                               'user_link_Tco_url', 'user_linkUrl', 'user_listedCount', 'user_location',
@@ -61,12 +61,9 @@ def get_tweets(query, limit=1_000_000_000, csv_only=False):
                                               'user_protected', 'user_raw_description', 'user_statuses_count',
                                               'user_url', 'user_username', 'user_verified'])
 
-    if csv_only:
-        dataframe.to_csv('tweets.csv', encoding='utf-8-sig', index=False)
-        print("Downloaded tweets saved as CSV.")
-    else:
-        print(f"Dataframe have {dataframe.shape[0]} tweets")
-        return dataframe
+    print(f"Dataframe has {dataframe.shape[0]-1} tweets")
+
+    return dataframe
 
 
 def preprocessing(series, remove_hashtag=False, remove_mentions=False, remove_links=False, remove_numbers=False,
@@ -108,10 +105,10 @@ def preprocessing(series, remove_hashtag=False, remove_mentions=False, remove_li
         The preprocessed series.
     """
     if remove_hashtag:
-        series = series.str.replace('#[A-Za-z0-9]+\s?', '', regex=True)
+        series = series.str.replace(r'((#)[^\s]*)\b', '', regex=True)
 
     if remove_mentions:
-        series = series.str.replace('@[A-Za-z0-9]+\s?', '', regex=True)
+        series = series.str.replace(r'((@)[^\s]*)\b', '', regex=True)
 
     if remove_links:
         series = series.str.replace(r'\n', '', regex=True)
@@ -132,13 +129,14 @@ def preprocessing(series, remove_hashtag=False, remove_mentions=False, remove_li
         series = series.str.lower()
 
     if remove_punctuation:
+        series = series.str.replace(r"((')[^\s]*)\b", '', regex=True)
         series = series.str.replace(r'[^\w\s]', '', regex=True)
 
     if remove_rare_words:
         all_ = [x for y in series for x in y.split(' ')]
         a, b = np.unique(all_, return_counts=True)
         print(f"Average word count: {np.mean(b)}")
-        to_remove = a[b < rare_limit]
+        to_remove = a[b <= rare_limit]
         series = [' '.join(np.array(y.split(' '))[~np.isin(y.split(' '), to_remove)]) for y in series]
         print(f"Removed {len(to_remove)} rare words")
 
@@ -171,7 +169,6 @@ def sentiment(series, model_name="savasy/bert-base-turkish-sentiment-cased"):
     sa = pipeline("sentiment-analysis", tokenizer=tokenizer, model=model)
     for i, k in enumerate(series):
         result = sa(k)
-        print(result[0]['label'], result[0]['score'])
         label.append(result[0]['label'])
         score.append(result[0]['score'])
         if i % 100 == 0 and i != 0:
@@ -209,10 +206,9 @@ def translator(series, target_language="en", from_language="auto", secure_transl
     """
     secure_list, translate_list = [], []
     start = timer()
-    error = False
     print("Translation started, It's too slow due to API limit.")
     print("100 tweets nearly takes 40 seconds")
-    print("You will see progress in the console soon.")
+    print("You will see the progress in the console soon.")
     for i, k in enumerate(series):
         try:
             translate_list.append(translate(k, target_language, from_language))
@@ -226,7 +222,27 @@ def translator(series, target_language="en", from_language="auto", secure_transl
                 print(f"{i} tweets are translated and {timedelta(seconds=(timer() - start))} time elapsed")
         except Exception as e:
             print(e)
-            error = False
-            return secure_list, error
+            return secure_list
     print(f"Translation is done in {timedelta(seconds=(timer() - start))}")
-    return translate_list, error
+    return translate_list
+
+
+def language_detect(series):
+    """
+    Tasks
+    -----
+        Detects the language of the given series.
+
+    Parameters
+    ----------
+    series: pandas.Series
+        The series to be detected.
+    Returns
+    -------
+    series: pandas.Series
+        The language of the given series.
+    """
+    detected = [detect(k) for k in series]
+    print(pd.Series(detected).value_counts(normalize=True))
+    return detected
+
