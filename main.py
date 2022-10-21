@@ -6,6 +6,12 @@ query = '"asgari ücret" lang:tr until:2022-10-20 since:2022-09-20'
 tweets = get_tweets(query, 100)
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+
+# For detect the language of tweets
+tweets['detected_language'] = language_detect(tweets['content'])
+>>>>>>> Stashed changes
 =======
 
 # For detect the language of tweets
