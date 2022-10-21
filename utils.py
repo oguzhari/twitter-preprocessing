@@ -64,18 +64,11 @@ def get_tweets(query, limit=1000000000, also_csv=False, csv_name='tweets.csv'):
                                               'user_protected', 'user_raw_description', 'user_statuses_count',
                                               'user_url', 'user_username', 'user_verified'])
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
     if also_csv:
         dataframe.to_csv(csv_name, index=False)
         print("CSV file is created")
-    print(f"Dataframe has {dataframe.shape[0] - 1} tweets")
-=======
-=======
->>>>>>> Stashed changes
-    print(f"Dataframe has {dataframe.shape[0]-1} tweets")
 
->>>>>>> Stashed changes
+    print(f"Dataframe has {dataframe.shape[0]-1} tweets")
     return dataframe
 
 

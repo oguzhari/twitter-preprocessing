@@ -4,24 +4,19 @@ query = '"asgari ücret" lang:tr until:2022-10-20 since:2022-09-20'
 # You can get that query from the website: https://twitter.com/search-advanced
 
 tweets = get_tweets(query, 100)
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
+
 
 # For detect the language of tweets
 tweets['detected_language'] = language_detect(tweets['content'])
->>>>>>> Stashed changes
-=======
+
 
 # For detect the language of tweets
 tweets['detected_language'] = language_detect(tweets['content'])
->>>>>>> Stashed changes
-=======
+
 
 # For detect the language of tweets
 tweets['detected_language'] = language_detect(tweets['content'])
->>>>>>> Stashed changes
+
 
 # For remove mentions from tweets
 tweets['content_rmv_mention'] = preprocessing(tweets['content'], remove_mentions=True)
