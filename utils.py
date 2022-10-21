@@ -9,7 +9,7 @@ from datetime import timedelta
 from langdetect import detect
 
 
-def get_tweets(query, limit=1000000000):
+def get_tweets(query, limit=1000000000, also_csv=False, csv_name='tweets.csv'):
     """
     Tasks
     -----
@@ -21,7 +21,10 @@ def get_tweets(query, limit=1000000000):
         The query to be searched on Twitter.
     limit: int (default=1000000000)
         The limit of tweets to be searched.
-
+    also_csv: bool (default=False)
+        If True, saves the tweets as a csv file.
+    csv_name: str (default='tweets.csv')
+        The name of the csv file to be saved.
     Returns
     -------
     dataframe: pandas.DataFrame
@@ -61,8 +64,10 @@ def get_tweets(query, limit=1000000000):
                                               'user_protected', 'user_raw_description', 'user_statuses_count',
                                               'user_url', 'user_username', 'user_verified'])
 
-    print(f"Dataframe has {dataframe.shape[0]-1} tweets")
-
+    if also_csv:
+        dataframe.to_csv(csv_name, index=False)
+        print("CSV file is created")
+    print(f"Dataframe has {dataframe.shape[0] - 1} tweets")
     return dataframe
 
 
