@@ -111,40 +111,70 @@ def preprocessing(series, remove_hashtag=False, remove_mentions=False, remove_li
         The preprocessed series.
     """
     if remove_hashtag:
+        print("Removing hashtags...")
+        start = timer()
         series = series.str.replace(r'((#)[^\s]*)\b', '', regex=True)
+        print(f"Removed in {timedelta(seconds=timer() - start)}")
 
     if remove_mentions:
+        print("Removing mentions...")
+        start = timer()
         series = series.str.replace(r'((@)[^\s]*)\b', '', regex=True)
+        print(f"Removed in {timedelta(seconds=timer() - start)}")
 
     if remove_links:
+        print("Removing links...")
+        start = timer()
         series = series.str.replace(r'\n', '', regex=True)
         series = series.apply(lambda x: re.split('https:\/\/.*', str(x))[0])
+        print(f"Removed in {timedelta(seconds=timer() - start)}")
 
     if remove_numbers:
+        print("Removing numbers...")
+        start = timer()
         series = series.str.replace(r'\d+', '', regex=True)
+        print(f"Removed in {timedelta(seconds=timer() - start)}")
 
     if remove_short_text:
+        print("Removing short texts...")
+        start = timer()
         series = series.apply(lambda x: re.sub(r'\b\w{1,2}\b', '', x))
+        print(f"Removed in {timedelta(seconds=timer() - start)}")
 
     if remove_stopwords:
+        print("Removing stopwords...")
+        start = timer()
         with open('assets/stopwords.txt', 'r') as f:
             stop = [line.strip() for line in f]
         series = series.apply(lambda x: ' '.join([word for word in x.split() if word not in stop]))
+        print(f"Stopwords are removed in {timedelta(seconds=timer() - start)}")
 
     if lowercase:
+        print("Lowercasing...")
+        start = timer()
         series = series.str.lower()
+        print(f"Lowercasing is done in {timedelta(seconds=timer() - start)}")
 
     if remove_punctuation:
+        print("Removing punctuation...")
+        start = timer()
         series = series.str.replace(r"((')[^\s]*)\b", '', regex=True)
         series = series.str.replace(r'[^\w\s]', '', regex=True)
+        print(f"Removed in {timedelta(seconds=timer() - start)}")
 
     if remove_rare_words:
-        all_ = [x for y in series for x in y.split(' ')]
-        a, b = np.unique(all_, return_counts=True)
-        print(f"Average word count: {np.mean(b)}")
-        to_remove = a[b <= rare_limit]
-        series = [' '.join(np.array(y.split(' '))[~np.isin(y.split(' '), to_remove)]) for y in series]
-        print(f"Removed {len(to_remove)} rare words")
+        print("Removing rare words...")
+        start = timer()
+        whole_count = pd.Series(" ".join(series).split()).value_counts()
+        print(f"There are {whole_count.count()} words in the series")
+        print(f"%{round(whole_count[whole_count <= rare_limit].count() / whole_count.count() * 100, 2)} of "
+              f"words appear less than {rare_limit} times")
+        print(f"Average word count: {np.mean(whole_count)}")
+        to_remove = whole_count[whole_count <= rare_limit]
+        print(f"Removing rare words...")
+        series = series.apply(lambda x: " ".join(x for x in x.split() if x not in to_remove))
+        print(f"{len(to_remove)} rare words removed")
+        print(f"Removed in {timedelta(seconds=timer() - start)}")
 
     return series
 
