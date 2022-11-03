@@ -1,12 +1,8 @@
 import pandas as pd
-import snscrape.modules.twitter as sntwitter
 import re
 import numpy as np
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
-from mtranslate import translate
 from timeit import default_timer as timer
 from datetime import timedelta
-from langdetect import detect
 
 
 def get_tweets(query, limit=1000000000, also_csv=False, csv_name='tweets.csv'):
@@ -30,6 +26,9 @@ def get_tweets(query, limit=1000000000, also_csv=False, csv_name='tweets.csv'):
     dataframe: pandas.DataFrame
         The dataframe containing the tweets.
     """
+
+    import snscrape.modules.twitter as sntwitter
+
     tweets = []
     for i, t in enumerate(sntwitter.TwitterSearchScraper(query).get_items()):
         if i > limit:
@@ -199,6 +198,9 @@ def sentiment(series, model_name="savasy/bert-base-turkish-sentiment-cased"):
     score: list
         The sentiment score of the given series.
     """
+
+    from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
+
     label, score = [], []
     model = AutoModelForSequenceClassification.from_pretrained(model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -240,6 +242,9 @@ def translator(series, target_language="en", from_language="auto", secure_transl
     series: pandas.Series
         The translated series.
     """
+
+    from mtranslate import translate
+
     secure_list, translate_list = [], []
     start = timer()
     print("Translation started, It's too slow due to API limit.")
@@ -278,7 +283,177 @@ def language_detect(series):
     series: pandas.Series
         The language of the given series.
     """
+
+    from langdetect import detect
+
     detected = [detect(k) for k in series]
     print(pd.Series(detected).value_counts(normalize=True))
     return detected
 
+
+def get_models(x, y, test_size=0.25, random_state=10, classification=False, average='binary'):
+    """
+    Tasks
+    -----
+        This functions returns scores of baseline models for classification and regression problems.
+    Parameters
+    ----------
+    x: pandas.DataFrame
+        The features of the dataset.
+    y: pandas.Series
+        The target of the dataset.
+    test_size: float (default=0.2)
+        The size of the test set.
+    random_state: int (default=42)
+        The random state of the train test split.
+    classification
+        If True, the function will work on classification and returns their score.
+    average: str (default='binary')
+        The average method of the classification report.
+
+    Returns
+    -------
+    print: str
+        The scores of the baseline models.
+    """
+
+    from sklearn.metrics import accuracy_score, mean_squared_error, f1_score, precision_score, recall_score
+    from sklearn.model_selection import train_test_split
+
+    # Tum Base Modeller (Classification)
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.neighbors import KNeighborsClassifier
+    from sklearn.tree import DecisionTreeClassifier
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.ensemble import GradientBoostingClassifier
+    from catboost import CatBoostClassifier
+    from lightgbm import LGBMClassifier
+    from sklearn.svm import SVC
+
+    # Tum Base Modeller (Regression)
+    from catboost import CatBoostRegressor
+    from lightgbm import LGBMRegressor
+    from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+    from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
+    from sklearn.neighbors import KNeighborsRegressor
+    from sklearn.svm import SVR
+    from sklearn.tree import DecisionTreeRegressor
+    from xgboost import XGBRegressor
+
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=random_state)
+
+    all_models = []
+
+    if classification:
+        models = [('LR', LogisticRegression(random_state=random_state)),
+                  ('KNN', KNeighborsClassifier()),
+                  ('CART', DecisionTreeClassifier(random_state=random_state)),
+                  ('RF', RandomForestClassifier(random_state=random_state)),
+                  ('SVM', SVC(gamma='auto', random_state=random_state)),
+                  ('XGB', GradientBoostingClassifier(random_state=random_state)),
+                  ("LightGBM", LGBMClassifier(random_state=random_state)),
+                  ("CatBoost", CatBoostClassifier(verbose=False, random_state=random_state))]
+
+        for name, model in models:
+            start = timer()
+            print(f"{name} is training")
+            model.fit(x_train, y_train)
+            y_pred = model.predict(x_test)
+            acc_test = accuracy_score(y_test, y_pred)
+            precision = precision_score(y_test, y_pred, average=average)
+            recall = recall_score(y_test, y_pred, average=average)
+            f1 = f1_score(y_test, y_pred, average=average)
+            values = dict(name=name, acc_test=acc_test, precision=precision, recall=recall, f1=f1,
+                          train_time=str(timedelta(seconds=(timer() - start)))[-15:])
+            print(f"{name} is done in {timedelta(seconds=(timer() - start))}")
+            all_models.append(values)
+        sort_method = False
+
+    else:
+        models = [('LR', LinearRegression()),
+                  ("Ridge", Ridge()),
+                  ("Lasso", Lasso()),
+                  ("ElasticNet", ElasticNet()),
+                  ('KNN', KNeighborsRegressor()),
+                  ('CART', DecisionTreeRegressor()),
+                  ('RF', RandomForestRegressor()),
+                  ('SVR', SVR()),
+                  ('GBM', GradientBoostingRegressor()),
+                  ("XGBoost", XGBRegressor()),
+                  ("LightGBM", LGBMRegressor()),
+                  ("CatBoost", CatBoostRegressor(verbose=False))]
+
+        for name, model in models:
+            print(f"{name} is training")
+            model.fit(x_train, y_train)
+            y_pred_test = model.predict(x_test)
+            y_pred_train = model.predict(x_train)
+            rmse_test = np.sqrt(mean_squared_error(y_test, y_pred_test))
+            rmse_train = np.sqrt(mean_squared_error(y_train, y_pred_train))
+            values = dict(name=name, RMSE_TRAIN=rmse_train, RMSE_TEST=rmse_test)
+            all_models.append(values)
+        sort_method = True
+
+    all_models_df = pd.DataFrame(all_models)
+    all_models_df = all_models_df.sort_values(all_models_df.columns[1], ascending=sort_method)
+    print("\nAll models are done")
+    print(all_models_df.to_markdown())
+    return None
+
+
+def create_tfidf(series):
+    """
+    Tasks
+    -----
+        Creates tfidf matrix for the given series.
+
+    Parameters
+    ----------
+    series: pandas.Series
+        The series to be transformed.
+
+    Returns
+    -------
+    df_tfidf_vect: pandas.DataFrame
+        The tfidf matrix.
+    """
+
+    from sklearn.feature_extraction.text import TfidfVectorizer
+
+    tfidf_vectorized = TfidfVectorizer(analyzer='word')
+    tfidf_wm = tfidf_vectorized.fit_transform(series)
+    tfidf_tokens = tfidf_vectorized.get_feature_names_out()
+    df_tfidf_vect = pd.DataFrame(data=tfidf_wm.toarray(), columns=tfidf_tokens)
+
+    return df_tfidf_vect
+
+
+def describe_series(series):
+    """
+    Tasks
+    -----
+        Describes the given series.
+
+    Parameters
+    ----------
+    series: pandas.Series
+        The series to be described.
+
+    Returns
+    -------
+    print: str
+        The description of the given series.
+    """
+    most_repeated_word = pd.Series(" ".join(series).split()).value_counts().index[1]
+    most_repeated_count = pd.Series(" ".join(series).split()).value_counts()[1]
+
+    print(f"""
+    Missing Values: {series.isnull().sum()}
+    Series has {len(series)} rows.
+    Series has {pd.Series(" ".join(series).split()).value_counts().count()} unique words.
+    Most repeated word is "{most_repeated_word}".
+    "{most_repeated_word}" is repeated {most_repeated_count} times.
+    """)
+
+
+    return None
