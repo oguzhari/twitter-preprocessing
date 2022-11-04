@@ -291,7 +291,7 @@ def language_detect(series):
     return detected
 
 
-def get_models(x, y, test_size=0.25, random_state=10, classification=False, average='binary'):
+def get_models(x, y, test_size=0.25, random_state=10, classification=False, average='binary', order_type='acc'):
     """
     Tasks
     -----
@@ -310,6 +310,10 @@ def get_models(x, y, test_size=0.25, random_state=10, classification=False, aver
         If True, the function will work on classification and returns their score.
     average: str (default='binary')
         The average method of the classification report.
+    order_type: str (default='acc')
+        The order type of the scores. If 'acc', the scores will be ordered by accuracy. If 'f1', the scores will be
+        ordered by f1 score. If 'precision', the scores will be ordered by precision score. If 'recall', the scores will
+        be ordered by recall score. If 'time' scores will be ordered by time.
 
     Returns
     -------
@@ -343,7 +347,7 @@ def get_models(x, y, test_size=0.25, random_state=10, classification=False, aver
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=random_state)
 
     all_models = []
-
+    order_types = {'acc': 1, 'precision': 2, 'recall': 3, 'f1': 4, 'time': 5}
     if classification:
         models = [('LR', LogisticRegression(random_state=random_state)),
                   ('KNN', KNeighborsClassifier()),
@@ -395,8 +399,10 @@ def get_models(x, y, test_size=0.25, random_state=10, classification=False, aver
         sort_method = True
 
     all_models_df = pd.DataFrame(all_models)
-    all_models_df = all_models_df.sort_values(all_models_df.columns[1], ascending=sort_method)
-    print("\nAll models are done")
+    if order_type == 'time':
+        sort_method = True
+    all_models_df = all_models_df.sort_values(all_models_df.columns[order_types[order_type]], ascending=sort_method)
+    print(f"\nAll models are done --- ordered by {order_type}")
     print(all_models_df.to_markdown())
     return None
 
