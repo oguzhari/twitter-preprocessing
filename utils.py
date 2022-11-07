@@ -3,6 +3,7 @@ import re
 import numpy as np
 from timeit import default_timer as timer
 from datetime import timedelta
+from alive_progress import alive_bar
 
 
 def get_tweets(query, limit=1000000000, also_csv=False, csv_name='tweets.csv'):
@@ -30,24 +31,24 @@ def get_tweets(query, limit=1000000000, also_csv=False, csv_name='tweets.csv'):
     import snscrape.modules.twitter as sntwitter
 
     tweets = []
-    for i, t in enumerate(sntwitter.TwitterSearchScraper(query).get_items()):
-        if i > limit:
-            break
-        else:
-            tweets.append(
-                [t.id, t.url, t.media, t.date.strftime("%d/%m/%Y, %H:%M:%S"), t.retweetCount, t.likeCount, t.quoteCount,
-                 t.hashtags, t.content, t.lang, t.user.location, t.cashtags, t.conversationId, t.coordinates,
-                 t.inReplyToTweetId, t.inReplyToUser, t.mentionedUsers, t.outlinks, t.place,
-                 t.quotedTweet, t.renderedContent, t.replyCount, t.retweetCount, t.retweetedTweet, t.source,
-                 t.sourceLabel, t.sourceUrl, t.tcooutlinks, t.user, t.user.username,
-                 t.user.created.strftime("%d-%m-%Y %H:%M:%S"), t.user.description, t.user.descriptionUrls,
-                 t.user.displayname, t.user.favouritesCount, t.user.followersCount, t.user.friendsCount, t.user.id,
-                 t.user.label, t.user.linkTcourl, t.user.linkUrl, t.user.listedCount, t.user.location,
-                 t.user.mediaCount, t.user.profileBannerUrl, t.user.profileImageUrl, t.user.protected,
-                 t.user.rawDescription, t.user.statusesCount, t.user.url, t.user.username, t.user.verified])
-
-        if i % 100 == 0 and i != 0:
-            print(f"Downloaded {i} tweets")
+    with alive_bar(limit+1, force_tty=True) as bar:
+        for i, t in enumerate(sntwitter.TwitterSearchScraper(query).get_items()):
+            if i > limit:
+                break
+            else:
+                tweets.append(
+                    [t.id, t.url, t.media, t.date.strftime("%d/%m/%Y, %H:%M:%S"), t.retweetCount, t.likeCount,
+                     t.quoteCount,
+                     t.hashtags, t.content, t.lang, t.user.location, t.cashtags, t.conversationId, t.coordinates,
+                     t.inReplyToTweetId, t.inReplyToUser, t.mentionedUsers, t.outlinks, t.place,
+                     t.quotedTweet, t.renderedContent, t.replyCount, t.retweetCount, t.retweetedTweet, t.source,
+                     t.sourceLabel, t.sourceUrl, t.tcooutlinks, t.user, t.user.username,
+                     t.user.created.strftime("%d-%m-%Y %H:%M:%S"), t.user.description, t.user.descriptionUrls,
+                     t.user.displayname, t.user.favouritesCount, t.user.followersCount, t.user.friendsCount, t.user.id,
+                     t.user.label, t.user.linkTcourl, t.user.linkUrl, t.user.listedCount, t.user.location,
+                     t.user.mediaCount, t.user.profileBannerUrl, t.user.profileImageUrl, t.user.protected,
+                     t.user.rawDescription, t.user.statusesCount, t.user.url, t.user.username, t.user.verified])
+            bar()
 
     dataframe = pd.DataFrame(tweets, columns=['id', 'url', 'media', 'date', 'retweet_count', 'like_count', 'quoteCount',
                                               'hashtags', 'content', 'lang', 'user_location',
@@ -460,6 +461,5 @@ def describe_series(series):
     Most repeated word is "{most_repeated_word}".
     "{most_repeated_word}" is repeated {most_repeated_count} times.
     """)
-
-
     return None
+
