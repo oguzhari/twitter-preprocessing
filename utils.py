@@ -6,7 +6,7 @@ from datetime import timedelta
 from alive_progress import alive_bar
 
 
-def get_tweets(query, limit=1000000000, also_csv=False, csv_name='tweets.csv'):
+def get_tweets(query, limit=1_000_000_000, also_csv=False, csv_name='tweets.csv'):
     """
     Tasks
     -----
@@ -31,16 +31,15 @@ def get_tweets(query, limit=1000000000, also_csv=False, csv_name='tweets.csv'):
     import snscrape.modules.twitter as sntwitter
 
     tweets = []
-    with alive_bar(limit+1, force_tty=True) as bar:
+    with alive_bar(limit + 1, force_tty=True) as bar:
         for i, t in enumerate(sntwitter.TwitterSearchScraper(query).get_items()):
             if i > limit:
                 break
             else:
                 tweets.append(
                     [t.id, t.url, t.media, t.date.strftime("%d/%m/%Y, %H:%M:%S"), t.retweetCount, t.likeCount,
-                     t.quoteCount,
-                     t.hashtags, t.content, t.lang, t.user.location, t.cashtags, t.conversationId, t.coordinates,
-                     t.inReplyToTweetId, t.inReplyToUser, t.mentionedUsers, t.outlinks, t.place,
+                     t.quoteCount, t.hashtags, t.content, t.lang, t.user.location, t.cashtags, t.conversationId,
+                     t.coordinates, t.inReplyToTweetId, t.inReplyToUser, t.mentionedUsers, t.outlinks, t.place,
                      t.quotedTweet, t.renderedContent, t.replyCount, t.retweetCount, t.retweetedTweet, t.source,
                      t.sourceLabel, t.sourceUrl, t.tcooutlinks, t.user, t.user.username,
                      t.user.created.strftime("%d-%m-%Y %H:%M:%S"), t.user.description, t.user.descriptionUrls,
@@ -68,7 +67,7 @@ def get_tweets(query, limit=1000000000, also_csv=False, csv_name='tweets.csv'):
         dataframe.to_csv(csv_name, index=False)
         print("CSV file is created")
 
-    print(f"Dataframe has {dataframe.shape[0]-1} tweets")
+    print(f"Dataframe has {dataframe.shape[0] - 1} tweets")
     return dataframe
 
 
@@ -168,8 +167,7 @@ def preprocessing(series, remove_hashtag=False, remove_mentions=False, remove_li
         whole_count = pd.Series(" ".join(series).split()).value_counts()
         print(f"There are {whole_count.count()} words in the series")
         print(f"%{round(whole_count[whole_count <= rare_limit].count() / whole_count.count() * 100, 2)} of "
-              f"words appear less than {rare_limit} times")
-        print(f"Average word count: {np.mean(whole_count)}")
+              f"words appear lesser than rare limit ({rare_limit}) times")
         to_remove = whole_count[whole_count <= rare_limit]
         print(f"Removing rare words...")
         series = series.apply(lambda x: " ".join(x for x in x.split() if x not in to_remove))
@@ -292,7 +290,8 @@ def language_detect(series):
     return detected
 
 
-def get_models(x, y, test_size=0.25, random_state=10, classification=False, average='binary', order_type='acc'):
+def get_models(x, y, test_size=0.25, random_state=10, classification=False, average='binary', order_type='acc',
+               info=False):
     """
     Tasks
     -----
@@ -315,7 +314,8 @@ def get_models(x, y, test_size=0.25, random_state=10, classification=False, aver
         The order type of the scores. If 'acc', the scores will be ordered by accuracy. If 'f1', the scores will be
         ordered by f1 score. If 'precision', the scores will be ordered by precision score. If 'recall', the scores will
         be ordered by recall score. If 'time' scores will be ordered by time.
-
+    info: bool (default=False)
+        If True, the function will print while training.
     Returns
     -------
     print: str
@@ -361,7 +361,7 @@ def get_models(x, y, test_size=0.25, random_state=10, classification=False, aver
 
         for name, model in models:
             start = timer()
-            print(f"{name} is training")
+            if info: print(f"{name} is training")
             model.fit(x_train, y_train)
             y_pred = model.predict(x_test)
             acc_test = accuracy_score(y_test, y_pred)
@@ -370,7 +370,7 @@ def get_models(x, y, test_size=0.25, random_state=10, classification=False, aver
             f1 = f1_score(y_test, y_pred, average=average)
             values = dict(name=name, acc_test=acc_test, precision=precision, recall=recall, f1=f1,
                           train_time=str(timedelta(seconds=(timer() - start)))[-15:])
-            print(f"{name} is done in {timedelta(seconds=(timer() - start))}")
+            if info: print(f"{name} is done in {timedelta(seconds=(timer() - start))}")
             all_models.append(values)
         sort_method = False
 
@@ -453,13 +453,14 @@ def describe_series(series):
     """
     most_repeated_word = pd.Series(" ".join(series).split()).value_counts().index[1]
     most_repeated_count = pd.Series(" ".join(series).split()).value_counts()[1]
+    average_word_count = np.mean(series.apply(lambda x: len(x.split())))
 
     print(f"""
     Missing Values: {series.isnull().sum()}
     Series has {len(series)} rows.
     Series has {pd.Series(" ".join(series).split()).value_counts().count()} unique words.
+    Average word count {round(average_word_count, 3)}
     Most repeated word is "{most_repeated_word}".
     "{most_repeated_word}" is repeated {most_repeated_count} times.
     """)
     return None
-
