@@ -31,9 +31,12 @@ def get_tweets(query, limit=1_000_000_000, also_csv=False, csv_name='tweets.csv'
     import snscrape.modules.twitter as sntwitter
 
     tweets = []
-    with alive_bar(limit + 1, force_tty=True) as bar:
+
+    with alive_bar(limit, force_tty=True) as bar:
+
+        if limit == 1000000000: print("Limit not defined. Progress bar may work untidy.")
         for i, t in enumerate(sntwitter.TwitterSearchScraper(query).get_items()):
-            if i > limit:
+            if i >= limit:
                 break
             else:
                 tweets.append(
@@ -65,7 +68,7 @@ def get_tweets(query, limit=1_000_000_000, also_csv=False, csv_name='tweets.csv'
 
     if also_csv:
         dataframe.to_csv(csv_name, index=False)
-        print("CSV file is created")
+        print("CSV file created")
 
     print(f"Dataframe has {dataframe.shape[0] - 1} tweets")
     return dataframe
