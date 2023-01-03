@@ -265,9 +265,9 @@ def translator(series, target_language="en", from_language="auto", secure_transl
                 print(f"{i} tweets are translated and {timedelta(seconds=(timer() - start))} time elapsed")
         except Exception as e:
             print(e)
-            return secure_list
+            return secure_list, True
     print(f"Translation is done in {timedelta(seconds=(timer() - start))}")
-    return translate_list
+    return translate_list, False
 
 
 def language_detect(series):

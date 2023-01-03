@@ -3,7 +3,7 @@ from utils import *
 query = '"asgari ücret" lang:tr until:2022-10-20 since:2022-09-20'
 # You can get that query from the website: https://twitter.com/search-advanced
 
-tweets = get_tweets(query, 1000)
+tweets = get_tweets(query, 100)
 
 
 # For detect the language of tweets
@@ -40,8 +40,10 @@ tweets['content_rmv_stopwords'] = preprocessing(tweets['content'], remove_stopwo
 # For extract sentiment labels and scores from tweets
 tweets[['label', 'score']] = sentiment(tweets['content'])
 
+# For extract sentiment labels and scores from tweets
 translates, error = translator(tweets['content'], 'en', secure_translations=True)
 
+# if error return False, translates add to tweets dataframe
 if not error:
     tweets['translated'] = translates
 
