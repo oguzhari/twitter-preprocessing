@@ -6,7 +6,7 @@ from datetime import timedelta
 from alive_progress import alive_bar
 
 
-def get_tweets(query, limit=1_000_000_000, also_csv=False, csv_name='tweets.csv'):
+def get_tweets(query, limit=1_000_000_000, readable_csv=False, csv_name='tweets'):
     """
     Tasks
     -----
@@ -66,11 +66,12 @@ def get_tweets(query, limit=1_000_000_000, also_csv=False, csv_name='tweets.csv'
                                               'user_protected', 'user_raw_description', 'user_statuses_count',
                                               'user_url', 'user_username', 'user_verified'])
 
-    if also_csv:
-        dataframe.to_csv(csv_name, index=False)
+    if readable_csv:
+        dataframe.to_csv(csv_name + '.csv', index=True, encoding='utf-8-sig')
+        dataframe.content.to_csv(csv_name + '_readable.csv', index=True, encoding='utf-8-sig')
         print("CSV file created")
 
-    print(f"Dataframe has {dataframe.shape[0] - 1} tweets")
+    print(f"Dataframe has {dataframe.shape[0]} tweets")
     return dataframe
 
 
