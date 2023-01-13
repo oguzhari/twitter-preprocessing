@@ -42,10 +42,10 @@ def get_tweets(query, limit=1_000_000_000, readable_csv=False, csv_name='tweets'
                 tweets.append(
                     [t.id, t.url, t.media, t.date.strftime("%d/%m/%Y, %H:%M:%S"), t.retweetCount, t.likeCount,
                      t.quoteCount, t.hashtags, t.content, t.lang, t.user.location, t.cashtags, t.conversationId,
-                     t.coordinates, t.inReplyToTweetId, t.inReplyToUser, t.mentionedUsers, t.outlinks, t.place,
+                     t.coordinates, t.inReplyToTweetId, t.inReplyToUser, t.mentionedUsers, t.links, t.place,
                      t.quotedTweet, t.renderedContent, t.replyCount, t.retweetCount, t.retweetedTweet, t.source,
-                     t.sourceLabel, t.sourceUrl, t.tcooutlinks, t.user, t.user.username,
-                     t.user.created.strftime("%d-%m-%Y %H:%M:%S"), t.user.description, t.user.descriptionUrls,
+                     t.sourceLabel, t.sourceUrl, t.links, t.user, t.user.username,
+                     t.user.created.strftime("%d-%m-%Y %H:%M:%S"), t.user.renderedDescription, t.user.descriptionLinks,
                      t.user.displayname, t.user.favouritesCount, t.user.followersCount, t.user.friendsCount, t.user.id,
                      t.user.label, t.user.linkTcourl, t.user.linkUrl, t.user.listedCount, t.user.location,
                      t.user.mediaCount, t.user.profileBannerUrl, t.user.profileImageUrl, t.user.protected,
