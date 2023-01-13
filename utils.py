@@ -294,7 +294,7 @@ def language_detect(series):
     return detected
 
 
-def get_models(x, y, test_size=0.25, random_state=10, classification=False, average='binary', order_type='acc',
+def get_models(x, y, test_size=0.25, random_state=15, classification=False, average='binary', order_type='acc',
                info=False):
     """
     Tasks
