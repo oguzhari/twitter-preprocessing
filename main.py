@@ -16,10 +16,6 @@ tweets['detected_language'] = language_detect(tweets['content'])
 # For detect the language of tweets
 tweets['detected_language'] = language_detect(tweets['content'])
 
-tweets = get_tweets(query, 1000, also_csv=True)
-tweets
-
-
 # For detect the language of tweets
 tweets['detected_language'] = language_detect(tweets['content'])
 

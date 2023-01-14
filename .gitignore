@@ -1,3 +1,4 @@
 thing/
 .idea/csv-plugin.xml
 __pycache__/utils.cpython-39.pyc
+.idea/csv-editor.xml
