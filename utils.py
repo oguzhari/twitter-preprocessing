@@ -359,7 +359,7 @@ def get_models(x, y, test_size=0.25, random_state=15, classification=False, aver
                   ('CART', DecisionTreeClassifier(random_state=random_state)),
                   ('RF', RandomForestClassifier(random_state=random_state)),
                   ('SVM', SVC(gamma='auto', random_state=random_state)),
-                  ('XGB', GradientBoostingClassifier(random_state=random_state)),
+                  ('GradientBoosting', GradientBoostingClassifier(random_state=random_state)),
                   ("LightGBM", LGBMClassifier(random_state=random_state)),
                   ("CatBoost", CatBoostClassifier(verbose=False, random_state=random_state))]
 
