@@ -87,6 +87,8 @@ def preprocessing(series, remove_hashtag=False, remove_mentions=False, remove_li
     ----------
     series: pandas.Series
         The series to be preprocessed.
+    lowercase: bool
+        If True, converts all characters to lowercase.
     remove_hashtag: bool
         If True, removes hashtags (#) from the series.
     remove_mentions: bool
@@ -99,8 +101,6 @@ def preprocessing(series, remove_hashtag=False, remove_mentions=False, remove_li
         If True, removes short texts (shorter than the given value) from the series.
     remove_stopwords: bool
         If True, removes stopwords (gets stopwords from stopwords.txt) from the series.
-    lowercase: bool
-        If True, converts all characters to lowercase.
     remove_punctuation:
         If True, removes punctuation from the series.
     remove_rare_words:

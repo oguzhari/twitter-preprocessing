@@ -34,7 +34,7 @@ tweets['content_rmv_link_hashtag_uppercase'] = preprocessing(tweets['content'], 
 tweets['content_rmv_punctuation'] = preprocessing(tweets['content_rmv_link_hashtag_uppercase'], remove_punctuation=True)
 
 # For remove rare words from tweets, you can change rare_limit value
-tweets['content_rmv_rare_words'] = preprocessing(tweets['content_rmv_punctuation'], remove_rare_words=True, rare_limit=0)
+tweets['content_rmv_rare_words'] = preprocessing(tweets['content_rmv_punctuation'], remove_rare_words=True, rare_limit=1)
 
 # for remove short texts from tweets
 tweets['content_rmv_short_text'] = preprocessing(tweets['content_rmv_rare_words'], remove_short_text=True)
@@ -47,20 +47,9 @@ tweets[['label', 'score']] = sentiment(tweets['content'])
 
 
 # For extract sentiment labels and scores from tweets
-
-print("test")
-
 translates, error = translator(tweets['content'], 'en', secure_translations=True)
 
 # if error return False, translates add to tweets dataframe
 if not error:
     tweets['translated'] = translates
-
-ogrenme_seti = pd.read_csv('thing/ml_test.csv', encoding='utf-8')
-
-y = ogrenme_seti['Zafer Kutlaması']
-
-tfidf_dataframe = create_tfidf(ogrenme_seti['content'])
-
-get_models(tfidf_dataframe, y, classification=True)
 
