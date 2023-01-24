@@ -113,6 +113,12 @@ def preprocessing(series, remove_hashtag=False, remove_mentions=False, remove_li
     series: pandas.Series
         The preprocessed series.
     """
+    if lowercase:
+        print("Lowercasing...")
+        start = timer()
+        series = series.str.lower()
+        print(f"Lowercasing is done in {timedelta(seconds=timer() - start)}")
+
     if remove_hashtag:
         print("Removing hashtags...")
         start = timer()
@@ -147,16 +153,10 @@ def preprocessing(series, remove_hashtag=False, remove_mentions=False, remove_li
     if remove_stopwords:
         print("Removing stopwords...")
         start = timer()
-        with open('assets/stopwords.txt', 'r') as f:
+        with open('assets/stopwords.txt', 'r', encoding='utf-8') as f:
             stop = [line.strip() for line in f]
         series = series.apply(lambda x: ' '.join([word for word in x.split() if word not in stop]))
         print(f"Stopwords are removed in {timedelta(seconds=timer() - start)}")
-
-    if lowercase:
-        print("Lowercasing...")
-        start = timer()
-        series = series.str.lower()
-        print(f"Lowercasing is done in {timedelta(seconds=timer() - start)}")
 
     if remove_punctuation:
         print("Removing punctuation...")

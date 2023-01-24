@@ -1,3 +1,5 @@
 thing/
 .idea/
 __pycache__/
+tweets.csv
+tweets_readable.csv

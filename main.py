@@ -27,7 +27,7 @@ tweets['content_rmv_mention'] = preprocessing(tweets['content'], remove_mentions
 tweets['content_rmv_link'] = preprocessing(tweets['content'], remove_links=True)
 
 # For remove links, hashtags and make lowercase from tweets
-tweets['content_rmv_link_hashtag_uppercase'] = preprocessing(tweets['content_rmv_mention'], remove_links=True,
+tweets['content_rmv_link_hashtag_uppercase'] = preprocessing(tweets['content'], remove_links=True, remove_mentions=True,
                                                              lowercase=True, remove_hashtag=True)
 
 # For remove punctuation from tweets
