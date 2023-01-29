@@ -18,7 +18,7 @@ def get_tweets(query, limit=1_000_000_000, readable_csv=False, csv_name='tweets'
         The query to be searched on Twitter.
     limit: int (default=1000000000)
         The limit of tweets to be searched.
-    also_csv: bool (default=False)
+    readable_csv: bool (default=False)
         If True, saves the tweets as a csv file.
     csv_name: str (default='tweets.csv')
         The name of the csv file to be saved.
@@ -155,7 +155,7 @@ def preprocessing(series, remove_hashtag=False, remove_mentions=False, remove_li
         start = timer()
         with open('assets/stopwords.txt', 'r', encoding='utf-8') as f:
             stop = [line.strip() for line in f]
-        series = series.apply(lambda x: ' '.join([word for word in x.split() if word not in stop]))
+        series = series.apply(lambda x: ' '.join([word for word in x.split() if word.lower() not in stop]))
         print(f"Stopwords are removed in {timedelta(seconds=timer() - start)}")
 
     if remove_punctuation:

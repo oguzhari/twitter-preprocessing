@@ -1,5 +1,3 @@
-import pandas as pd
-
 from utils import *
 
 query = '"asgari ücret" lang:tr until:2022-10-20 since:2022-09-20'
@@ -28,7 +26,7 @@ tweets['content_rmv_link'] = preprocessing(tweets['content'], remove_links=True)
 
 # For remove links, hashtags and make lowercase from tweets
 tweets['content_rmv_link_hashtag_uppercase'] = preprocessing(tweets['content'], remove_links=True, remove_mentions=True,
-                                                             lowercase=True, remove_hashtag=True)
+                                                             remove_stopwords=True, remove_hashtag=True)
 
 # For remove punctuation from tweets
 tweets['content_rmv_punctuation'] = preprocessing(tweets['content_rmv_link_hashtag_uppercase'], remove_punctuation=True)
