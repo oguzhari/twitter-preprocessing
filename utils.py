@@ -468,3 +468,28 @@ def describe_series(series):
     "{most_repeated_word}" is repeated {most_repeated_count} times.
     """)
     return None
+
+
+def tr_en_char_translate(series):
+    """
+    Tasks
+    -----
+        Convert Turkish characters to English characters.
+
+    Parameters
+    ----------
+    series: pandas.Series
+        The series to be translated.
+
+    Returns
+    -------
+    series: pandas.Series
+        The translated series.
+    """
+    series = series.str.replace('ı', 'i')
+    series = series.str.replace('ü', 'u')
+    series = series.str.replace('ö', 'o')
+    series = series.str.replace('ğ', 'g')
+    series = series.str.replace('ş', 's')
+    series = series.str.replace('ç', 'c')
+    return series
