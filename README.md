@@ -1,5 +1,7 @@
 # twitter-preprocessing 
 
+27.04.2023 Notu: An itibariyle Twitter'ın yapmış olduğu değişiklikler snscrape'i çalışamaz hale getirmiştir. Bu sebepten ötürü yapacağınız bütün aramalarda hata almanız çok olasıdır. Twitter haricindeki diğer veri ön işleme yöntemleri çalışmaktadır, ancak, Twitter'dan veri alma konusunun ne olacağı şu anlık net değil.
+
 Twitter'dan snscrape aracılığıyla veri almak ve onu veri önişleme süreçlerinden geçirmek için bir tool. 
 
 Direkt olarak tweetleri alıp bir CSV dosyası oluşturabilir ya da işlemek üzere bir dataframe'e kaydedebilirsiniz.
